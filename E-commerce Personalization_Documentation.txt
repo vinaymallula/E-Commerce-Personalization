@@ -1,0 +1,99 @@
+E-commerce Personalization
+
+The main aim of our project E-commerce Personalization is to make a application of E-commerce page that recommends products, clustering costumers, dynamic price strategies,etc  abased on some particular features.
+
+The data for our is extracted from a famous website for the Datasets, Machine Learning Codes, NLP topics etc.
+The name of our data set is retail costumer segmentation and recommendation, the dataset contains a large no of entries of data with feature names:
+InvoiceNo, StockCode, Description, Quantity, InvoiceDate, UnitPrice, CustomerID, Country.
+
+This data is not sufficient for our tasks such as clustering and costumer segmentation and recommendation system rather we ourselves created some of the features;
+CustomerID- Identifier uniquely assigned to each customer, used to distinguish individual customers.
+Days_Since_Last_Purchase- The number of days that have passed since the customer's last purchase.
+Total_Transactions- The total number of transactions made by the customer.
+Total_Products_Purchased- The total quantity of products purchased by the customer across all transactions.
+Total_Spend- The total amount of money the customer has spent across all transactions.
+Average_Transaction_Value- The average value of the customer's transactions, calculated as total spend divided by the number of transactions.
+Unique_Products_Purchased- The number of different products the customer has purchased.
+Average_Days_Between_Purchases- The average number of days between consecutive purchases made by the customer.
+Day_Of_Week- The day of the week when the customer prefers to shop, represented numerically (0 for Monday, 6 for Sunday).
+Hour- The hour of the day when the customer prefers to shop, represented in a 24-hour format.
+Is_UK- A binary variable indicating whether the customer is based in the UK (1) or not (0).
+Cancellation_Frequency- The total number of transactions that the customer has cancelled.
+Cancellation_Rate- The proportion of transactions that the customer has cancelled, calculated as cancellation frequency divided by total transactions.
+Monthly_Spending_Mean- The average monthly spending of the customer.
+Monthly_Spending_Std- The standard deviation of the customer's monthly spending, indicating the variability in their spending pattern.
+Spending_Trend- A numerical representation of the trend in the customer's spending over time. A positive value indicates an increasing trend, a negative value indicates a decreasing trend, and a value close to zero indicates a stable trend.
+
+Importing Libraries
+*# Ignore warnings
+import warnings
+warnings.filterwarnings('ignore')
+
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
+import plotly.graph_objects as go
+from matplotlib.colors import LinearSegmentedColormap
+from matplotlib import colors as mcolors
+from scipy.stats import linregress
+from sklearn.ensemble import IsolationForest
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from yellowbrick.cluster import KElbowVisualizer, SilhouetteVisualizer
+from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
+from sklearn.cluster import KMeans
+from tabulate import tabulate
+from collections import Counter
+
+%matplotlib inline
+*
+In the process of data cleaning we deleted some of the unwanted entries in the dataset like features having some null values and having outliers etc. Those data is cleaned properly and later we performed our taskes.
+
+#Detecting outliers - we used Isolation Forest Model for detecting the outliers in the dataset.
+
+*# Initializing the IsolationForest model with a contamination parameter of 0.05
+model = IsolationForest(contamination=0.05, random_state=0)
+
+# Fitting the model on our dataset (converting DataFrame to NumPy to avoid warning)
+customer_data['Outlier_Scores'] = model.fit_predict(customer_data.iloc[:, 1:].to_numpy())
+
+# Creating a new column to identify outliers (1 for inliers and -1 for outliers)
+customer_data['Is_Outlier'] = [1 if x == -1 else 0 for x in customer_data['Outlier_Scores']]
+
+# Display the first few rows of the customer_data dataframe
+customer_data.head()*
+
+Later we performed Correlation analysis:
+Before we proceed to KMeans clustering, it's essential to check the correlation between features in our dataset. The presence of multicollinearity, where features are highly correlated, can potentially affect the clustering process by not allowing the model to learn the actual underlying patterns in the data, as the features do not provide unique information. This could lead to clusters that are not well-separated and meaningful.
+
+If we identify multicollinearity, we can utilize dimensionality reduction techniques like PCA. These techniques help in neutralizing the effect of multicollinearity by transforming the correlated features into a new set of uncorrelated variables, preserving most of the original data's variance. This step not only enhances the quality of clusters formed but also makes the clustering process more computationally efficient.
+
+Later we performed HeatMap for for correlation Variable:
+
+Looking at the heatmap, we can see that there are some pairs of variables that have high correlations, for instance:
+Monthly_Spending_Mean and Average_Transaction_Value
+Total_Spend and Total_Products_Purchased
+Total_Transactions and Total_Spend
+Cancellation_Rate and Cancellation_Frequency
+Total_Transactions and Total_Products_Purchased
+
+Later we performed Dimensionality Reduction:
+Why We Need Dimensionality Reduction? 
+Multicollinearity Detected: In the previous steps, we identified that our dataset contains multicollinear features. Dimensionality reduction can help us remove redundant information and alleviate the multicollinearity issue.
+
+Better Clustering with K-means: Since K-means is a distance-based algorithm, having a large number of features can sometimes dilute the meaningful underlying patterns in the data. By reducing the dimensionality, we can help K-means to find more compact and well-separated clusters.
+
+Noise Reduction: By focusing only on the most important features, we can potentially remove noise in the data, leading to more accurate and stable clusters.
+
+Enhanced Visualization: In the context of customer segmentation, being able to visualize customer groups in two or three dimensions can provide intuitive insights. Dimensionality reduction techniques can facilitate this by reducing the data to a few principal components which can be plotted easily.
+
+Improved Computational Efficiency: Reducing the number of features can speed up the computation time during the modeling process, making our clustering algorithm more efficient.
+
+Next we done KMeans algorithm for our model with the Elbow method, we found 5 is our K variable.
+Finally we done the recommendation system with the help of the cluster data presented.
+
+next we created a GUI for our E-Commerce Personalization in Tkinter GUI.
+
+
